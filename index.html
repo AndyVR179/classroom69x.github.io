@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Classroom 55X</title>
+
+<link rel="icon" href="https://ssl.gstatic.com/classroom/favicon.png">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:Arial;background:#0f0f0f;color:#fff;}
+.navbar{display:flex;justify-content:space-between;align-items:center;padding:18px 30px;background:#111;border-bottom:1px solid #222;position:sticky;top:0;z-index:10;}
+.logo{font-size:22px;font-weight:bold;}
+#searchBar{padding:8px 12px;border-radius:6px;border:1px solid #333;background:#181818;color:#fff;width:220px;}
+.container{display:flex;}
+.sidebar{width:220px;background:#111;height:100vh;position:fixed;padding-top:20px;border-right:1px solid #222;}
+.sidebar ul{list-style:none;}
+.sidebar li{padding:12px 20px;color:#aaa;cursor:pointer;transition:.25s;}
+.sidebar li:hover,.sidebar li.active{background:#1c1c1c;color:#fff;}
+.main{margin-left:220px;padding:30px;width:100%;}
+.home-hero{background:#181818;padding:60px;border-radius:14px;text-align:center;margin-bottom:40px;border:1px solid #222;}
+.section-title{margin:40px 0 20px;font-size:20px;}
+.games{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:20px;}
+.game-card{background:#181818;border-radius:14px;overflow:hidden;cursor:pointer;transition:.2s;border:1px solid #222;}
+.game-card:hover{transform:translateY(-6px);border-color:#444;}
+.game-card img{width:100%;height:140px;object-fit:cover;}
+.game-card h3{padding:10px;font-size:14px;}
+.hidden{display:none;}
+.game-hero{height:250px;background:linear-gradient(135deg,#4a148c,#e91e63);display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:12px;position:relative;text-align:center;}
+.back-btn{position:absolute;top:15px;left:15px;background:#000;color:#fff;border:1px solid #444;padding:6px 12px;cursor:pointer;border-radius:6px;}
+.play-btn{padding:10px 25px;background:#fff;color:#000;border:none;border-radius:6px;cursor:pointer;margin-top:15px;font-weight:bold;}
+.frame-wrapper{position:relative;margin-top:20px;}
+#gameFrame{width:100%;height:600px;border:none;display:none;background:#000;}
+.fullscreen-btn{position:absolute;bottom:10px;right:10px;background:#000;color:#fff;border:1px solid #444;padding:6px 10px;cursor:pointer;border-radius:6px;z-index:5;}
+.hot-badge{position:absolute;top:8px;left:8px;background:red;padding:4px 8px;border-radius:6px;font-size:10px;}
+</style>
+</head>
+
+<body>
+
+<div class="navbar">
+<a href="#" onclick="goHome()" style="text-decoration:none;color:white;">
+<div class="logo">CLASSROOM 55X</div>
+</a>
+<input type="text" id="searchBar" placeholder="Search games..." onkeyup="searchGames()">
+</div>
+
+<div class="container">
+<div class="sidebar">
+<ul>
+<li class="active" onclick="filterCategory('All',this)">All Games</li>
+<li onclick="filterCategory('Arcade',this)">Arcade</li>
+<li onclick="filterCategory('Sports',this)">Sports</li>
+<li onclick="filterCategory('Platformer',this)">Platformer</li>
+<li onclick="filterCategory('Multiplayer',this)">Multiplayer</li>
+<li onclick="filterCategory('Horror',this)">Horror</li>
+</ul>
+</div>
+
+<div class="main">
+
+<div id="homePage">
+<div class="home-hero">
+<h1>Classroom 55X</h1>
+<p>Unblocked Games — No Ads, Just Fun, Made by Andy:P</p>
+</div>
+
+<div class="section-title">All Games</div>
+<div class="games" id="gameGrid"></div>
+</div>
+
+<div id="gamePage" class="hidden">
+<div class="game-hero">
+<button class="back-btn" onclick="goHome()">← Back</button>
+<h2 id="gameTitle"></h2>
+<button class="play-btn" onclick="startGame()">CLICK TO PLAY</button>
+</div>
+
+<div class="frame-wrapper">
+<iframe id="gameFrame"></iframe>
+<button class="fullscreen-btn" onclick="goFullscreen()">⛶</button>
+</div>
+</div>
+
+</div>
+</div>
+
+<script>
+const games = [
+{title:"Basket Random",category:"Sports",type:"iframe",url:"https://jasongamesdev.github.io/basket-random/",thumb:"https://jasongamesdev.github.io/basket-random/basket-random.png",hot:true},
+{title:"Soccer Random",category:"Sports",type:"iframe",url:"https://www.twoplayergames.org/embed/soccer-random",thumb:"https://dummyimage.com/300x170/111/fff&text=Soccer+Random"},
+{title:"Smash Karts",category:"Multiplayer",type:"iframe",url:"https://jasongamesdev.github.io/smash-karts/",thumb:"https://jasongamesdev.github.io/smash-karts/smash-karts.png",hot:true},
+{title:"Friday Night Funkin",category:"Arcade",type:"iframe",url:"https://jasongamesdev.github.io/friday-night-funkin/",thumb:"https://jasongamesdev.github.io/friday-night-funkin/friday-night-funkin.png"},
+{title:"Drift Boss",category:"Platformer",type:"iframe",url:"https://jasongamesdev.github.io/drift-boss/",thumb:"https://jasongamesdev.github.io/drift-boss/drift-boss.png"},
+{title:"Polytrack",category:"Arcade",type:"iframe",url:"https://jasongamesdev.github.io/polytrack/",thumb:"https://jasongamesdev.github.io/polytrack/polytrack.png"},
+{title:"FNAF 2",category:"Horror",type:"iframe",url:"https://jasongamesdev.github.io/fnaf-2/",thumb:"https://jasongamesdev.github.io/fnaf-2/fnaf-2.png",hot:true},
+{title:"Geometry Dash",category:"Platformer",type:"xml",file:"https://cdn.jsdelivr.net/gh/papamamia/gonzales@main/StreamingAssets/1.xml",thumb:"https://dummyimage.com/300x170/111/fff&text=Geometry+Dash"},
+{title:"Snow Rider 3D",category:"Arcade",type:"iframe",url:"https://jasongamesdev.github.io/snow-rider3d/",thumb:"https://jasongamesdev.github.io/snow-rider3d/snow-rider3d.png"},
+{title:"Cheese Chompers 3D",category:"Arcade",type:"iframe",url:"https://jasongamesdev.github.io/cheese-chompers-3d/",thumb:"https://jasongamesdev.github.io/cheese-chompers-3d/cheese-chompers-3d.png"},
+{title:"Thorn And Balloons",category:"Arcade",type:"iframe",url:"https://jasongamesdev.github.io/thorn-and-balloons/",thumb:"https://jasongamesdev.github.io/thorn-and-balloons/thorn-and-balloons.png"},
+{title:"Tag",category:"Platformer",type:"iframe",url:"https://jasongamesdev.github.io/tag/",thumb:"https://jasongamesdev.github.io/tag/tag.png",hot:true},
+{title:"Space Waves",category:"Platformer",type:"iframe",url:"https://jasongamesdev.github.io/space-waves/",thumb:"https://jasongamesdev.github.io/space-waves/space-waves.png",hot:true},
+{title:"Jelly Truck",category:"Platformer",type:"iframe",url:"https://jasongamesdev.github.io/jelly-truck/",thumb:"https://jasongamesdev.github.io/jelly-truck/jelly-truck.png"},
+{title:"Survival Race",category:"Multiplayer",type:"iframe",url:"https://jasongamesdev.github.io/survival-race/",thumb:"https://jasongamesdev.github.io/survival-race/survival-race.png"},
+{title:"Cookie Clicker",category:"Arcade",type:"iframe",url:"https://jasongamesdev.github.io/cookie-clicker/",thumb:"https://jasongamesdev.github.io/cookie-clicker/cookie-clicker.png",hot:true},
+{title:"FNAF",category:"Horror",type:"iframe",url:"https://jasongamesdev.github.io/five-nights-at-freddy/",thumb:"https://jasongamesdev.github.io/five-nights-at-freddy/five-nights-at-freddy.png",hot:true},
+{title:"Moto X3M",category:"Arcade",type:"iframe",url:"https://jasongamesdev.github.io/moto-x3m/",thumb:"https://jasongamesdev.github.io/moto-x3m/moto-x3m.png",hot:true},
+{title:"Slope",category:"Platformer",type:"iframe",url:"https://jasongamesdev.github.io/slope/",thumb:"https://jasongamesdev.github.io/slope/slope.png"},
+{title:"Slope 2",category:"Platformer",type:"iframe",url:"https://jasongamesdev.github.io/slope-2/",thumb:"https://jasongamesdev.github.io/slope-2/slope-2.png"},
+{title:"Slope 3",category:"Platformer",type:"iframe",url:"https://jasongamesdev.github.io/slope-3/",thumb:"https://jasongamesdev.github.io/slope-3/slope-3.png"},
+{title:"Vex3",category:"Platformer",type:"iframe",url:"https://jasongamesdev.github.io/vex-3/",thumb:"https://jasongamesdev.github.io/vex-3/vex-3.png"},
+{title:"Vex4",category:"Platformer",type:"iframe",url:"https://jasongamesdev.github.io/vex4/",thumb:"https://jasongamesdev.github.io/vex4/vex4.png"},
+{title:"Vex5",category:"Platformer",type:"iframe",url:"https://jasongamesdev.github.io/vex5/",thumb:"https://jasongamesdev.github.io/vex5/vex5.png"},
+{title:"Vex6",category:"Platformer",type:"iframe",url:"https://jasongamesdev.github.io/vex6/",thumb:"https://jasongamesdev.github.io/vex6/vex6.png"},
+{title:"Spacebar Clicker",category:"Arcade",type:"iframe",url:"https://jasongamesdev.github.io/spacebar-clicker/",thumb:"https://jasongamesdev.github.io/spacebar-clicker/spacebar-clicker.png"},
+{title:"OVO",category:"Platformer",type:"iframe",url:"https://jasongamesdev.github.io/ovo/",thumb:"https://jasongamesdev.github.io/ovo/ovo.png"},
+{title:"OVO2",category:"Platformer",type:"iframe",url:"https://jasongamesdev.github.io/ovo-2/",thumb:"https://jasongamesdev.github.io/ovo-2/ovo-2.png"},
+{title:"Among Us",category:"Platformer",type:"iframe",url:"https://jasongamesdev.github.io/among-us/",thumb:"https://jasongamesdev.github.io/among-us/among-us.png"},
+{title:"Super Mario 64",category:"Platformer",type:"iframe",url:"https://jasongamesdev.github.io/super-mario-64/",thumb:"https://jasongamesdev.github.io/super-mario-64/super-mario-64.png"},
+{title:"Subway Surfers",category:"Platformer",type:"iframe",url:"https://jasongamesdev.github.io/subway-surfers/",thumb:"https://jasongamesdev.github.io/subway-surfers/subway-surfers.png"},
+{title:"Color Rush",category:"Arcade",type:"iframe",url:"https://jasongamesdev.github.io/color-rush/",thumb:"https://jasongamesdev.github.io/color-rush/color-rush.png"}
+];
+
+let currentGame=null;
+
+/* SAME FUNCTIONS */
+function renderGames(filter="All"){
+const grid=document.getElementById("gameGrid");
+grid.innerHTML="";
+games.forEach(g=>{
+if(filter==="All"||g.category===filter) createCard(g,grid);
+});
+}
+
+function createCard(g,container){
+let card=document.createElement("div");
+card.className="game-card";
+card.onclick=()=>openGame(g);
+
+card.innerHTML=`
+<div style="position:relative">
+${g.hot?'<div class="hot-badge">HOT</div>':''}
+<img src="${g.thumb}">
+</div>
+<h3>${g.title}</h3>
+`;
+container.appendChild(card);
+}
+
+function searchGames(){
+const input=document.getElementById("searchBar").value.toLowerCase();
+const grid=document.getElementById("gameGrid");
+grid.innerHTML="";
+games.forEach(g=>{
+if(g.title.toLowerCase().includes(input)) createCard(g,grid);
+});
+}
+
+function filterCategory(cat,el){
+document.querySelectorAll(".sidebar li").forEach(li=>li.classList.remove("active"));
+if(el) el.classList.add("active");
+renderGames(cat);
+}
+
+/* FIXED OPEN */
+function openGame(game){
+    currentGame = game;
+
+    // FULL RESET (like first load)
+    const wrapper = document.querySelector(".frame-wrapper");
+
+    // remove old iframe completely
+    const oldFrame = document.getElementById("gameFrame");
+    if(oldFrame) oldFrame.remove();
+
+    // create fresh iframe (hidden until play)
+    const newFrame = document.createElement("iframe");
+    newFrame.id = "gameFrame";
+    newFrame.style.width = "100%";
+    newFrame.style.height = "600px";
+    newFrame.style.border = "none";
+    newFrame.style.display = "none";
+    newFrame.style.background = "#000";
+
+    wrapper.prepend(newFrame);
+
+    document.getElementById("homePage").classList.add("hidden");
+    document.getElementById("gamePage").classList.remove("hidden");
+
+    document.getElementById("gameTitle").innerText = game.title;
+    document.querySelector(".play-btn").style.display = "inline-block";
+}
+
+function startGame(){
+    const frame = document.getElementById("gameFrame");
+
+    frame.style.display = "block";
+    document.querySelector(".play-btn").style.display = "none";
+
+    if(currentGame.type === "iframe"){
+        frame.src = currentGame.url;
+    } else {
+        fetch(currentGame.file)
+        .then(r => r.text())
+        .then(t => frame.srcdoc = t)
+        .catch(() => alert("Game blocked by browser."));
+    }
+}
